@@ -127,7 +127,7 @@ export default function Agents() {
                         {agent.name}
                         {agent.is_default && (
                           <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
-                            Default
+                            {t('default_badge')}
                           </span>
                         )}
                       </CardTitle>
@@ -157,7 +157,7 @@ export default function Agents() {
                     className="font-semibold text-sm cursor-pointer"
                     htmlFor={`default-${agent.id}`}
                   >
-                    {agent.is_default ? 'Default Agent' : 'Set as Default'}
+                    {agent.is_default ? t('default_agent') : t('set_as_default')}
                   </Label>
                   <Switch
                     id={`default-${agent.id}`}

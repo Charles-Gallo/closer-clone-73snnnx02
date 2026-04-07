@@ -219,6 +219,14 @@ Deno.serve(async (req: Request) => {
       }
 
       if (!contact) {
+        const { data: defaultAgent } = await supabase
+          .from('ai_agents')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('is_default', true)
+          .eq('is_active', true)
+          .maybeSingle()
+
         const { data: newContact } = await supabase
           .from('whatsapp_contacts')
           .insert({
@@ -228,6 +236,7 @@ Deno.serve(async (req: Request) => {
             push_name: pushName,
             last_message_at: timestamp,
             pipeline_stage: 'Em Conversa',
+            ai_agent_id: defaultAgent?.id || null,
           })
           .select('id, phone_number, push_name')
           .single()

@@ -147,6 +147,9 @@ export const translations = {
     cancel: 'Cancel',
     save_changes: 'Save Changes',
     default_system_prompt: 'You are a helpful assistant. Keep your answers brief and natural.',
+    default_agent: 'Default Agent',
+    set_as_default: 'Set as Default',
+    default_badge: 'Default',
 
     no_agent: 'No Agent',
     assign_agent: 'Assign AI Agent',
@@ -307,6 +310,9 @@ export const translations = {
     save_changes: 'Salvar Alterações',
     default_system_prompt:
       'Você é um assistente prestativo. Mantenha suas respostas curtas e naturais.',
+    default_agent: 'Agente Padrão',
+    set_as_default: 'Definir como Padrão',
+    default_badge: 'Padrão',
 
     no_agent: 'Sem Agente',
     assign_agent: 'Atribuir Agente de IA',
