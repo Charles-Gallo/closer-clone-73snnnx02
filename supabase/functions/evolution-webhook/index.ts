@@ -1,7 +1,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { extractCanonicalPhone } from '../_shared/utils.ts'
-import { processAiResponse } from '../_shared/ai-handler.ts'
+import { processAiResponse } from './ai-handler.ts'
 
 Deno.serve(async (req: Request) => {
   try {
@@ -219,14 +219,6 @@ Deno.serve(async (req: Request) => {
       }
 
       if (!contact) {
-        const { data: defaultAgent } = await supabase
-          .from('ai_agents')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('is_default', true)
-          .eq('is_active', true)
-          .maybeSingle()
-
         const { data: newContact } = await supabase
           .from('whatsapp_contacts')
           .insert({
@@ -236,7 +228,6 @@ Deno.serve(async (req: Request) => {
             push_name: pushName,
             last_message_at: timestamp,
             pipeline_stage: 'Em Conversa',
-            ai_agent_id: defaultAgent?.id || null,
           })
           .select('id, phone_number, push_name')
           .single()
