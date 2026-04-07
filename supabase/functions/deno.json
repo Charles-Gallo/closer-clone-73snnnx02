@@ -6,8 +6,8 @@
     "evolution-disconnect": 3,
     "evolution-get-qr": 3,
     "evolution-send-message": 3,
-    "evolution-sync-contacts": 3,
-    "evolution-sync-messages": 3,
+    "evolution-sync-contacts": 4,
+    "evolution-sync-messages": 4,
     "evolution-webhook": 3
   }
 }
