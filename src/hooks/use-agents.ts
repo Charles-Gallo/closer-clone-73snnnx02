@@ -117,6 +117,29 @@ export const useAgents = () => {
     setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, is_active: newStatus } : a)))
   }
 
+  const setDefaultAgent = async (id: string) => {
+    if (!user) return
+    const { error } = await supabase
+      .from('ai_agents')
+      .update({ is_default: true } as any)
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('Error setting default agent:', error)
+      toast.error('Failed to set default agent')
+      throw error
+    }
+
+    toast.success('Default agent updated')
+    setAgents((prev) =>
+      prev.map((a) => ({
+        ...a,
+        is_default: a.id === id,
+      })),
+    )
+  }
+
   return {
     agents,
     loading,
@@ -125,5 +148,6 @@ export const useAgents = () => {
     updateAgent,
     deleteAgent,
     toggleAgentStatus,
+    setDefaultAgent,
   }
 }

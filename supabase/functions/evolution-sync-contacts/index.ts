@@ -107,6 +107,15 @@ Deno.serve(async (req: Request) => {
           .select('*')
           .eq('user_id', user.id)
 
+        const { data: defaultAgent } = await supabaseClient
+          .from('ai_agents')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('is_default', true)
+          .eq('is_active', true)
+          .maybeSingle()
+        const defaultAgentId = defaultAgent?.id || null
+
         let processed = 0
         await supabaseClient
           .from('import_jobs')
@@ -233,6 +242,7 @@ Deno.serve(async (req: Request) => {
                 push_name: pushName || prefix,
                 profile_picture_url: c.profilePictureUrl || c.profilePicUrl || null,
                 last_message_at: lastMsgAt,
+                ai_agent_id: defaultAgentId,
               })
               .select()
               .single()

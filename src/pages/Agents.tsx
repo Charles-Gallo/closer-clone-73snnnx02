@@ -19,7 +19,15 @@ import { Plus, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { AIAgent } from '@/lib/types'
 
 export default function Agents() {
-  const { agents, loading, createAgent, updateAgent, deleteAgent, toggleAgentStatus } = useAgents()
+  const {
+    agents,
+    loading,
+    createAgent,
+    updateAgent,
+    deleteAgent,
+    toggleAgentStatus,
+    setDefaultAgent,
+  } = useAgents()
   const { t } = useLanguage()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -115,8 +123,13 @@ export default function Agents() {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div>
-                      <CardTitle className="text-lg tracking-tight line-clamp-1">
+                      <CardTitle className="text-lg tracking-tight line-clamp-1 flex items-center gap-2">
                         {agent.name}
+                        {agent.is_default && (
+                          <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                            Default
+                          </span>
+                        )}
                       </CardTitle>
                       <CardDescription className="text-xs font-semibold mt-0.5 uppercase tracking-wider">
                         {agent.is_active ? t('active') : t('inactive')}
@@ -137,6 +150,21 @@ export default function Agents() {
                   <p className="text-xs font-mono text-muted-foreground line-clamp-2 leading-relaxed opacity-70">
                     {agent.system_prompt}
                   </p>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 p-3 bg-muted/40 rounded-xl border border-border/60">
+                  <Label
+                    className="font-semibold text-sm cursor-pointer"
+                    htmlFor={`default-${agent.id}`}
+                  >
+                    {agent.is_default ? 'Default Agent' : 'Set as Default'}
+                  </Label>
+                  <Switch
+                    id={`default-${agent.id}`}
+                    checked={agent.is_default || false}
+                    onCheckedChange={() => setDefaultAgent(agent.id)}
+                    disabled={agent.is_default}
+                  />
                 </div>
               </CardContent>
               <div className="border-t border-border/40 bg-muted/10 p-4 flex justify-end gap-2 shrink-0">

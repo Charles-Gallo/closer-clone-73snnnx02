@@ -105,6 +105,15 @@ Deno.serve(async (req: Request) => {
           if (id.phone_jid && id.canonical_phone) identityMap.set(id.phone_jid, id.canonical_phone)
         })
 
+        const { data: defaultAgent } = await supabaseClient
+          .from('ai_agents')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('is_default', true)
+          .eq('is_active', true)
+          .maybeSingle()
+        const defaultAgentId = defaultAgent?.id || null
+
         const missingJids = validJids.filter((jid) => {
           let canonicalPhone = identityMap.get(jid) || extractCanonicalPhone({ remoteJid: jid })
           if (contactMap.has(jid)) return false
@@ -138,6 +147,7 @@ Deno.serve(async (req: Request) => {
               remote_jid: effJid,
               phone_number: phone,
               push_name: pushName || prefix,
+              ai_agent_id: defaultAgentId,
             }
           })
           for (let i = 0; i < newContacts.length; i += 50) {
