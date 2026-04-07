@@ -1,7 +1,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { extractCanonicalPhone } from '../_shared/utils.ts'
-import { processAiResponse } from './ai-handler.ts'
+import { processAiResponse } from '../_shared/ai-handler.ts'
 
 Deno.serve(async (req: Request) => {
   try {
