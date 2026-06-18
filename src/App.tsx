@@ -15,6 +15,7 @@ import Pipeline from './pages/Pipeline'
 import Settings from './pages/Settings'
 import Chat from './pages/Chat'
 import Agents from './pages/Agents'
+import Customers from './pages/Customers'
 import NotFound from './pages/NotFound'
 import Onboarding from './pages/Onboarding'
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="contacts" element={<Contacts />} />
                 <Route path="chat/:id" element={<Chat />} />
                 <Route path="agents" element={<Agents />} />
+                <Route path="customers" element={<Customers />} />
               </Route>
 
               <Route path="/settings" element={<DashboardLayout />}>

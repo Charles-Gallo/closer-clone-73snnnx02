@@ -1,3 +1,27 @@
+export interface Customer {
+  id: string
+  name: string
+  status: string
+  sdr_limit: number
+  message_limit: number
+  evolution_api_url?: string
+  evolution_api_key?: string
+  evolution_instance_name?: string
+  llm_provider?: string
+  llm_api_key?: string
+  created_at: string
+}
+
+export interface Profile {
+  id: string
+  email: string
+  full_name: string | null
+  role: 'agency' | 'admin' | 'sdr'
+  customer_id: string | null
+  customer?: { id: string; name: string } | null
+  created_at: string
+}
+
 export interface UserIntegration {
   id: string
   user_id: string

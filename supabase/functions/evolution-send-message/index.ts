@@ -25,33 +25,77 @@ Deno.serve(async (req: Request) => {
     const { contactId, text } = await req.json()
     if (!contactId || !text) throw new Error('Missing contactId or text')
 
+    // Get User Profile to find Customer ID
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('customer_id')
+      .eq('id', user.id)
+      .single()
+
+    const customerId = profile?.customer_id
+
+    let customer = null
+    if (customerId) {
+      const { data: c } = await supabaseClient
+        .from('customers')
+        .select('*')
+        .eq('id', customerId)
+        .single()
+      customer = c
+    }
+
+    // Usage Tracking Check
+    if (customer && customer.message_limit) {
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+
+      const { count } = await supabaseClient
+        .from('whatsapp_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', customerId)
+        .eq('from_me', true)
+        .gte('timestamp', startOfMonth.toISOString())
+
+      if (count && count >= customer.message_limit) {
+        throw new Error('Message limit exceeded for this billing cycle')
+      }
+    }
+
     const { data: integration } = await supabaseClient
       .from('user_integrations')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!integration || !integration.instance_name) {
+    const evoUrlRaw =
+      customer?.evolution_api_url ||
+      integration?.evolution_api_url ||
+      Deno.env.get('EVOLUTION_API_URL')
+    const evoKey =
+      customer?.evolution_api_key ||
+      integration?.evolution_api_key ||
+      Deno.env.get('EVOLUTION_API_KEY')
+    const instanceName = customer?.evolution_instance_name || integration?.instance_name
+
+    if (!instanceName) {
       throw new Error('Integration not found or not connected')
     }
 
-    const evoUrlRaw = integration.evolution_api_url || Deno.env.get('EVOLUTION_API_URL')
     const evoUrl = evoUrlRaw ? evoUrlRaw.replace(/\/$/, '') : ''
-    const evoKey = integration.evolution_api_key || Deno.env.get('EVOLUTION_API_KEY')
 
     const { data: contact } = await supabaseClient
       .from('whatsapp_contacts')
-      .select('remote_jid')
+      .select('remote_jid, customer_id')
       .eq('id', contactId)
-      .eq('user_id', user.id)
       .single()
 
     if (!contact || !contact.remote_jid) throw new Error('Contact not found')
 
-    const response = await fetch(`${evoUrl}/message/sendText/${integration.instance_name}`, {
+    const response = await fetch(`${evoUrl}/message/sendText/${instanceName}`, {
       method: 'POST',
       headers: {
-        apikey: evoKey,
+        apikey: evoKey || '',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -73,6 +117,7 @@ Deno.serve(async (req: Request) => {
     await supabaseClient.from('whatsapp_messages').upsert(
       {
         user_id: user.id,
+        customer_id: customerId,
         contact_id: contactId,
         message_id: messageId,
         from_me: true,

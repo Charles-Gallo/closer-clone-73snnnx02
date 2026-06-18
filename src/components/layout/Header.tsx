@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import closerLogo from '@/assets/closer_logo-fcd09.png'
 
 export function Header() {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const { integration } = useIntegration()
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -37,16 +37,25 @@ export function Header() {
         <div className="flex items-center md:hidden -mt-[17px]">
           <img src={closerLogo} alt="Closer" className="h-12 w-auto object-contain" />
         </div>
-        <div className="flex items-center gap-2.5 text-xs font-bold text-foreground bg-muted/50 px-4 py-2 rounded-full border border-border shadow-subtle">
-          <div className={cn('h-2.5 w-2.5 rounded-full', getStatusColor(integration?.status))} />
-          <span className="hidden sm:inline-block tracking-tight uppercase">
-            {integration?.status === 'CONNECTED'
-              ? t('connected')
-              : integration?.status === 'WAITING_QR'
-                ? t('waiting_qr')
-                : t('disconnected')}
-          </span>
-        </div>
+
+        {profile?.role !== 'agency' && (
+          <div className="flex items-center gap-2.5 text-xs font-bold text-foreground bg-muted/50 px-4 py-2 rounded-full border border-border shadow-subtle">
+            <div className={cn('h-2.5 w-2.5 rounded-full', getStatusColor(integration?.status))} />
+            <span className="hidden sm:inline-block tracking-tight uppercase">
+              {integration?.status === 'CONNECTED'
+                ? t('connected')
+                : integration?.status === 'WAITING_QR'
+                  ? t('waiting_qr')
+                  : t('disconnected')}
+            </span>
+          </div>
+        )}
+
+        {profile?.customer?.name && (
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold text-sm">
+            {profile.customer.name}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -63,17 +72,24 @@ export function Header() {
             align="end"
             className="w-60 rounded-2xl shadow-elevation border border-border p-2"
           >
-            <div className="px-4 py-3 mb-1 text-[13px] font-semibold text-muted-foreground truncate border-b border-border">
-              {user?.email}
+            <div className="px-4 py-3 mb-1 text-[13px] font-semibold text-muted-foreground truncate border-b border-border flex flex-col">
+              <span>{user?.email}</span>
+              <span className="text-[11px] uppercase tracking-wider mt-1 opacity-70">
+                {profile?.role || 'User'}
+              </span>
             </div>
-            <DropdownMenuItem
-              asChild
-              className="rounded-xl cursor-pointer my-1 focus:bg-muted py-2.5"
-            >
-              <Link to="/settings" className="flex items-center gap-3 font-semibold">
-                <Settings className="h-4 w-4 text-muted-foreground" /> {t('settings_nav')}
-              </Link>
-            </DropdownMenuItem>
+
+            {profile?.role !== 'sdr' && (
+              <DropdownMenuItem
+                asChild
+                className="rounded-xl cursor-pointer my-1 focus:bg-muted py-2.5"
+              >
+                <Link to="/settings" className="flex items-center gap-3 font-semibold">
+                  <Settings className="h-4 w-4 text-muted-foreground" /> {t('settings_nav')}
+                </Link>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuItem
               onClick={handleSignOut}
               className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 rounded-xl flex items-center gap-3 font-semibold py-2.5"
