@@ -5,7 +5,7 @@
     "evolution-create-instance": 4,
     "evolution-disconnect": 4,
     "evolution-get-qr": 4,
-    "evolution-send-message": 4,
+    "evolution-send-message": 5,
     "evolution-sync-contacts": 4,
     "evolution-sync-messages": 4,
     "evolution-webhook": 6
