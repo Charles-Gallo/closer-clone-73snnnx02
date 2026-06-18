@@ -16,8 +16,16 @@ import Settings from './pages/Settings'
 import Chat from './pages/Chat'
 import Agents from './pages/Agents'
 import Customers from './pages/Customers'
+import CustomerDetails from './pages/CustomerDetails'
+import { AgencyDashboard } from './components/dashboard/AgencyDashboard'
 import NotFound from './pages/NotFound'
 import Onboarding from './pages/Onboarding'
+
+const DashboardRoute = () => {
+  const { profile, loading } = useAuth()
+  if (loading) return null
+  return profile?.role === 'agency' ? <Navigate to="/agency" replace /> : <Dashboard />
+}
 
 const App = () => (
   <LanguageProvider>
@@ -32,14 +40,19 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
               </Route>
 
+              <Route path="/agency" element={<DashboardLayout />}>
+                <Route index element={<AgencyDashboard />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="customers/:id" element={<CustomerDetails />} />
+              </Route>
+
               <Route path="/app" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
+                <Route index element={<DashboardRoute />} />
                 <Route path="onboarding" element={<Onboarding />} />
                 <Route path="pipeline" element={<Pipeline />} />
                 <Route path="contacts" element={<Contacts />} />
                 <Route path="chat/:id" element={<Chat />} />
                 <Route path="agents" element={<Agents />} />
-                <Route path="customers" element={<Customers />} />
               </Route>
 
               <Route path="/settings" element={<DashboardLayout />}>

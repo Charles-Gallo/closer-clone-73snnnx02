@@ -27,8 +27,8 @@ export function Sidebar() {
 
   if (profile?.role === 'agency') {
     navItems = [
-      { name: 'Overview', path: '/app', icon: LayoutDashboard },
-      { name: 'Gestão de Clientes', path: '/app/customers', icon: Briefcase },
+      { name: 'Overview', path: '/agency', icon: LayoutDashboard },
+      { name: 'Gestão de Clientes', path: '/agency/customers', icon: Briefcase },
     ]
   } else if (profile?.role === 'sdr') {
     navItems = [{ name: t('contacts_nav') || 'Contacts', path: '/app/contacts', icon: Users }]
@@ -47,7 +47,9 @@ export function Sidebar() {
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
-            (item.path !== '/app' && location.pathname.startsWith(item.path))
+            (item.path !== '/app' &&
+              item.path !== '/agency' &&
+              location.pathname.startsWith(item.path))
           return (
             <Link
               key={item.path}
