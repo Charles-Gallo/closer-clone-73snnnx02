@@ -111,10 +111,7 @@ ${history}`
       Deno.env.get('EVOLUTION_API_URL') ||
       ''
     ).replace(/\/$/, '')
-    const evoKey =
-      customer?.evolution_api_key ||
-      integration?.evolution_api_key ||
-      Deno.env.get('EVOLUTION_API_KEY')
+    const evoKey = customer?.evolution_api_key || integration?.evolution_api_key || Deno.env.get('EVOLUTION_API_KEY')
     const instanceName = customer?.evolution_instance_name || integration?.instance_name
 
     if (!instanceName) return
@@ -158,6 +155,7 @@ ${history}`
         last_message_at: new Date().toISOString(),
       })
       .eq('id', contactId)
+
   } catch (error) {
     console.error('[AI Handler] Unhandled exception:', error)
   }
@@ -214,7 +212,7 @@ Deno.serve(async (req: Request) => {
         .select('id, user_id, customer_id')
         .eq('instance_name', instanceName)
         .maybeSingle()
-
+        
       if (integ) {
         userId = integ.user_id
         customerId = integ.customer_id
@@ -240,9 +238,9 @@ Deno.serve(async (req: Request) => {
       if (state === 'open' || state === 'close') {
         const status = state === 'open' ? 'CONNECTED' : 'DISCONNECTED'
         if (customerId) {
-          await supabase.from('user_integrations').update({ status }).eq('customer_id', customerId)
+            await supabase.from('user_integrations').update({ status }).eq('customer_id', customerId)
         } else {
-          await supabase.from('user_integrations').update({ status }).eq('user_id', userId)
+            await supabase.from('user_integrations').update({ status }).eq('user_id', userId)
         }
       }
       return new Response(JSON.stringify({ success: true }), { status: 200 })
@@ -261,12 +259,7 @@ Deno.serve(async (req: Request) => {
       const messageId = key.id || msgObj.id
       const fromMe = key.fromMe !== undefined ? key.fromMe : msgObj.fromMe || false
 
-      if (
-        !remoteJid ||
-        remoteJid === 'status@broadcast' ||
-        remoteJid.includes('@g.us') ||
-        !messageId
-      ) {
+      if (!remoteJid || remoteJid === 'status@broadcast' || remoteJid.includes('@g.us') || !messageId) {
         return new Response('Ignored', { status: 200 })
       }
 
@@ -280,22 +273,15 @@ Deno.serve(async (req: Request) => {
       const content = msgObj.message
       if (typeof content === 'string') text = content
       else if (content && typeof content === 'object') {
-        text =
-          content.conversation ||
-          content.extendedTextMessage?.text ||
-          content.imageMessage?.caption ||
-          content.videoMessage?.caption ||
-          msgObj.text ||
-          text
-        type = Object.keys(content).filter((k) => k !== 'messageContextInfo')[0] || 'text'
+        text = content.conversation || content.extendedTextMessage?.text || content.imageMessage?.caption || content.videoMessage?.caption || msgObj.text || text
+        type = Object.keys(content).filter(k => k !== 'messageContextInfo')[0] || 'text'
       } else if (msgObj.text) text = msgObj.text
 
       const ts = msgObj.messageTimestamp || msgObj.timestamp
       let timestamp = new Date().toISOString()
       if (ts) {
         const numTs = typeof ts === 'string' ? parseInt(ts, 10) : ts
-        if (numTs > 0)
-          timestamp = new Date(numTs < 100000000000 ? numTs * 1000 : numTs).toISOString()
+        if (numTs > 0) timestamp = new Date(numTs < 100000000000 ? numTs * 1000 : numTs).toISOString()
       }
 
       let { data: contact } = await supabase
@@ -330,15 +316,11 @@ Deno.serve(async (req: Request) => {
           .single()
         contact = newContact
       } else {
-        await supabase
-          .from('whatsapp_contacts')
-          .update({ last_message_at: timestamp, pipeline_stage: 'Em Conversa' })
-          .eq('id', contact.id)
+        await supabase.from('whatsapp_contacts').update({ last_message_at: timestamp, pipeline_stage: 'Em Conversa' }).eq('id', contact.id)
       }
 
       if (contact && messageId) {
-        const { error: insertError } = await supabase.from('whatsapp_messages').upsert(
-          {
+        const { error: insertError } = await supabase.from('whatsapp_messages').upsert({
             user_id: userId,
             customer_id: customerId,
             contact_id: contact.id,
@@ -348,22 +330,11 @@ Deno.serve(async (req: Request) => {
             type: type,
             timestamp: timestamp,
             raw: msgObj,
-          },
-          { onConflict: 'user_id,message_id' },
-        )
+        }, { onConflict: 'user_id,message_id' })
 
-        if (
-          !insertError &&
-          !fromMe &&
-          ['text', 'conversation', 'extendedTextMessage'].includes(type)
-        ) {
-          if (
-            typeof (globalThis as any).EdgeRuntime !== 'undefined' &&
-            typeof (globalThis as any).EdgeRuntime.waitUntil === 'function'
-          ) {
-            ;(globalThis as any).EdgeRuntime.waitUntil(
-              processAiResponse(userId, contact.id, supabaseUrl, supabaseKey),
-            )
+        if (!insertError && !fromMe && ['text', 'conversation', 'extendedTextMessage'].includes(type)) {
+          if (typeof (globalThis as any).EdgeRuntime !== 'undefined' && typeof (globalThis as any).EdgeRuntime.waitUntil === 'function') {
+            (globalThis as any).EdgeRuntime.waitUntil(processAiResponse(userId, contact.id, supabaseUrl, supabaseKey))
           } else {
             processAiResponse(userId, contact.id, supabaseUrl, supabaseKey).catch(console.error)
           }
