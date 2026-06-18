@@ -29,11 +29,23 @@ export function Sidebar() {
     navItems = [
       { name: 'Overview', path: '/agency', icon: LayoutDashboard },
       { name: 'Gestão de Clientes', path: '/agency/customers', icon: Briefcase },
+      { name: t('settings_nav') || 'Configurações Globais', path: '/settings', icon: SettingsIcon },
     ]
   } else if (profile?.role === 'sdr') {
-    navItems = [{ name: t('contacts_nav') || 'Contacts', path: '/app/contacts', icon: Users }]
+    navItems = [
+      { name: t('pipeline_nav') || 'Pipeline', path: '/app/pipeline', icon: Columns },
+      { name: t('contacts_nav') || 'Contacts', path: '/app/contacts', icon: Users },
+      { name: 'AI Agents', path: '/app/agents', icon: Bot },
+      { name: t('settings_nav') || 'Settings', path: '/settings', icon: SettingsIcon },
+    ]
   } else if (profile?.role === 'admin') {
-    navItems[4].name = 'Configurações do Cliente'
+    navItems = [
+      { name: t('overview_nav') || 'Overview', path: '/app', icon: LayoutDashboard },
+      { name: t('pipeline_nav') || 'Pipeline', path: '/app/pipeline', icon: Columns },
+      { name: t('contacts_nav') || 'Contacts', path: '/app/contacts', icon: Users },
+      { name: 'AI Agents', path: '/app/agents', icon: Bot },
+      { name: 'Configurações do Cliente', path: '/settings', icon: SettingsIcon },
+    ]
   }
 
   return (

@@ -7,7 +7,7 @@ import { BottomNav } from './layout/BottomNav'
 import { Loader2 } from 'lucide-react'
 
 export default function DashboardLayout() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const { integration, loading: integrationLoading } = useIntegration()
   const location = useLocation()
 
@@ -21,18 +21,32 @@ export default function DashboardLayout() {
 
   if (!user) return <Navigate to="/auth" replace />
 
+  const isAgency = profile?.role === 'agency'
   const isSetupComplete = integration?.is_setup_completed
   const isOnboardingRoute = location.pathname === '/app/onboarding'
+  const isAgencyRoute = location.pathname.startsWith('/agency')
+  const isAppRoute = location.pathname.startsWith('/app')
 
-  if (!isSetupComplete && !isOnboardingRoute) {
-    return <Navigate to="/app/onboarding" replace />
+  // Role-based route protection
+  if (isAgency && isAppRoute) {
+    return <Navigate to="/agency" replace />
   }
 
-  if (isSetupComplete && isOnboardingRoute) {
+  if (!isAgency && isAgencyRoute) {
     return <Navigate to="/app" replace />
   }
 
-  if (isOnboardingRoute) {
+  // Onboarding logic (Agencies bypass onboarding)
+  if (!isAgency) {
+    if (!isSetupComplete && !isOnboardingRoute) {
+      return <Navigate to="/app/onboarding" replace />
+    }
+    if (isSetupComplete && isOnboardingRoute) {
+      return <Navigate to="/app" replace />
+    }
+  }
+
+  if (isOnboardingRoute && !isAgency) {
     return (
       <div className="min-h-screen bg-background w-full overflow-y-auto animate-fade-in flex items-center justify-center p-4">
         <Outlet />
